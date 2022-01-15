@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef int bool;
 #define false 0  
@@ -65,6 +66,7 @@ int main() {
 	else {
 		printf("Fail\n----------\n");
 	}
+	system("pause");
 }
 
 // °õ¦æ¨D¸Ñ
