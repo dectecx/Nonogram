@@ -65,7 +65,6 @@ int main() {
 	else {
 		printf("Fail\n----------\n");
 	}
-	printf("%d", cnt);
 }
 
 // °õ¦æ¨D¸Ñ
