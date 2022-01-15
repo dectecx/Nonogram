@@ -4,61 +4,60 @@ typedef int bool;
 #define false 0  
 #define true  1  
 
-int rows[5][3] = { {3,0,0},{3,0,0},{2,2,0},{2,0,0},{1,0,0} };
-int columns[5][3] = { {2,0,0},{3,0,0},{2,0,0},{3,0,0},{3,0,0} };
-
-// Columns Rules
-int xRequirements[5][5] = { {2},{3},{2},{3},{3} };
-
-// Row Rules
-int yRequirements[5][5] = { {3},{3},{2,2},{2},{1} };
-
+#define mapsize 15
+#define rulelength 5
+int rows[mapsize][rulelength]={{2,3,1,0,0},{2,3,0,0,0},{2,4,1,0,0},{1,6,1,1,0},{5,3,0,0,0},{6,1,1,0,0},{4,1,0,0,0},{1,8,0,0,},{1,1,4,2,0},{3,5,0,0,0},{3,1,3,0,0},{3,4,0,0,0},{2,1,2,1,0},{2,2,3,1,0},{2,5,3,2,0}};
+int columns[mapsize][rulelength] = { {4,7,0,0,0},{3,6,0,0,0},{3,0,0,0,0},{2,1,0,0,0},{6,1,0,0,0},{4,3,0,0,0},{4,1,2,0,0},{3,1,1,0,0},{4,3,0,0,0},{4,8,0,0,0},{3,8,0,0,0},{4,1,5,2,0},{1,1,1,1,0},{7,1,0,0,0},{1,1,2,3,0} };
 // 寬度
-int width = 5;
-
+int width = mapsize;
 // 高度
-int height = 5;
-
+int height = mapsize;
 // 二維陣列 - 解圖面板
-int board[5][5];
+int board[mapsize][mapsize];
 
 bool Solve();
 bool FindSolution(int h, int w);
 bool Verify(int h, int w);
-bool VerifyRow(int requirements[], int maxLength, int length, char isColRow, int currentStep);
-void Print(int array2D[][5]);
+bool VerifyRow(int* requirements, int maxLineCount, int maxLength, int length, char isColRow, int currentStep);
+void PrintBoard();
+void WriteBoardToFile();
 
-/// <summary>
-/// 主程式
-/// </summary>
-int main()
-{
-	Solve();
+// 主程式
+int main() {
+	// 初始化解圖面板
+	int h = 0;
+	int w = 0;
+	for (h = 0; h < mapsize; h++) {
+		for (w = 0; w < mapsize; w++) {
+			board[h][w] = 0;
+		}
+	}
+	if (Solve()) {
+		printf("Success\n");
+		// 輸出結果
+		PrintBoard();
+		// 寫檔
+		WriteBoardToFile();
+	}
+	else {
+		printf("Fail\n");
+	}
 }
 
-/// <summary>
-/// 執行求解
-/// </summary>
-bool Solve()
-{
+// 執行求解
+bool Solve() {
 	// 從第一格開始求解
-	if (FindSolution(0, 0))
-	{
-		// 輸出結果
-		Print(board);
+	if (FindSolution(0, 0)) {
 		return true;
 	}
 	// 求解失敗
 	return false;
 }
 
-/// <summary>
-/// 尋找解答
-/// </summary>
-/// <param name="h">垂直第幾格</param>
-/// <param name="w">水平第幾格</param>
-bool FindSolution(int h, int w)
-{
+// 尋找解答
+// h:垂直第幾格
+// w:水平第幾格
+bool FindSolution(int h, int w) {
 	// 目前高度位置已等於最大高度
 	if (h == height)
 		return true;
@@ -70,65 +69,68 @@ bool FindSolution(int h, int w)
 	// 先嘗試標記為1
 	board[h][w] = 1;
 	// 先驗證是否符合行列的規則，若符合才往下遞迴(深度優先DFS)
-	if (Verify(h, w) && FindSolution(nextH, nextW))
-	{
+	if (Verify(h, w) && FindSolution(nextH, nextW)) {
 		return true;
 	}
 	// 此格子已不可能為1，標記為0
 	board[h][w] = 0;
-	if (Verify(h, w) && FindSolution(nextH, nextW))
-	{
+	if (Verify(h, w) && FindSolution(nextH, nextW)) {
 		return true;
 	}
 	// 目前為止標記的答案(含此格)有錯誤，返回遞迴
 	return false;
 }
 
-/// <summary>
-/// 驗證是否符合行列的規則
-/// </summary>
-/// <param name="h">垂直第幾格</param>
-/// <param name="w">水平第幾格</param>
-bool Verify(int h, int w)
-{
+// 驗證是否符合行列的規則
+// h: 垂直第幾格
+// w: 水平第幾格
+bool Verify(int h, int w) {
+	// 取得指定的寬度位置的數組中不為0數量
+	int colArrLength = 0;
+	// 取得指定的高度位置的數組中不為0數量
+	int rowArrLength = 0;
+	int i = 0;
+	for (i = 0; i < rulelength; i++) {
+		if (columns[w][i] != 0) {
+			colArrLength++;
+		}
+		if (rows[h][i] != 0) {
+			rowArrLength++;
+		}
+	}
 	return (
 		// 驗證指定的寬度位置的數組
-		VerifyRow(xRequirements[w], height, h, 'C', w) &&
+		VerifyRow(columns[w], colArrLength, height, h, 'C', w) &&
 		// 驗證指定的高度位置的數組
-		VerifyRow(yRequirements[h], width, w, 'R', h)
+		VerifyRow(rows[h], rowArrLength, width, w, 'R', h)
 		);
 }
 
-/// <summary>
-/// 驗證「指定的寬度位置的數組 / 指定的高度位置的數組」從第一格到「目前高度位置 / 目前寬度位置」是否都符合行列的規則
-/// </summary>
-/// <param name="requirements">指定的寬度位置的數組 / 指定的高度位置的數組</param>
-/// <param name="maxLength">最大寬度 / 最大高度</param>
-/// <param name="length">目前高度位置 / 目前寬度位置</param>
-/// <param name="isColRow">C:指定的寬度位置的數組 R:指定的高度位置的數組</param>
-/// <param name="currentStep">指定的寬度位置 / 指定的高度位置></param>
-bool VerifyRow(int requirements[], int maxLength, int length, char isColRow, int currentStep)
-{
+// 驗證「指定的寬度位置的數組 / 指定的高度位置的數組」從第一格到「目前高度位置 / 目前寬度位置」是否都符合行列的規則
+// requirements: 指定的寬度位置的數組 / 指定的高度位置的數組
+// maxLineCount: 指定的寬度位置的數組中不為0數量 / 指定的高度位置的數組中不為0數量
+// maxLength: 最大寬度 / 最大高度
+// length: 目前高度位置 / 目前寬度位置
+// isColRow: C:指定的寬度位置的數組 R:指定的高度位置的數組
+// currentStep: 指定的寬度位置 / 指定的高度位置>
+bool VerifyRow(int* requirements, int maxLineCount, int maxLength, int length, char isColRow, int currentStep) {
 	// 檢測到的線段數量
-	int k = 0;
+	int lineCount = 0;
 	// 檢測到的線段長度
-	int acc = 0;
+	int lineLen = 0;
 	// 是否正在畫線段
 	bool isLast = false;
 	// 從第一格到「目前高度位置 / 目前寬度位置」依序檢查
-	for (int i = 0; i <= length; i++)
-	{
+	int i = 0;
+	for (i = 0; i <= length; i++) {
 		// 當前迴圈檢查到的格子為1，表示是線段
 		int current = isColRow == 'C' ? board[i][currentStep] : board[currentStep][i];
-		if (current == 1)
-		{
+		if (current == 1) {
 			// 線段長度+1
-			acc++;
-			if (!isLast)
-			{
+			lineLen++;
+			if (!isLast) {
 				// 檢查線段數是否超過規範的組數
-				if (k >= sizeof(requirements) / sizeof(*requirements))
-				{
+				if (lineCount >= maxLineCount) {
 					return false;
 				}
 			}
@@ -136,20 +138,17 @@ bool VerifyRow(int requirements[], int maxLength, int length, char isColRow, int
 			isLast = true;
 		}
 		// 當前迴圈檢查到的格子為0，表示線段斷掉or沒有線段
-		else
-		{
+		else {
 			// 判斷是線段斷掉(isLast == true) or 沒有線段(isLast == false)
-			if (isLast)
-			{
+			if (isLast) {
 				// 檢查當前線段是否等於規範的長度
-				if (acc != requirements[k])
-				{
+				if (lineLen != requirements[lineCount]) {
 					return false;
 				}
 				// 歸零線段長度
-				acc = 0;
+				lineLen = 0;
 				// 累計線段數+1
-				k++;
+				lineCount++;
 			}
 			// 標註沒有線段
 			isLast = false;
@@ -157,48 +156,66 @@ bool VerifyRow(int requirements[], int maxLength, int length, char isColRow, int
 	}
 
 	// 是否已驗證到該高度/寬度最後一格
-	if (length == maxLength - 1)
-	{
+	if (length == maxLength - 1) {
 		// 如果是線段的話，要檢查當前線段是否等於規範的長度
-		if (isLast)
-		{
+		if (isLast) {
 			// 檢查線段數是否等於規範的組數 && 檢查當前線段是否等於規範的長度
-			return k == sizeof(requirements) / sizeof(*requirements) - 1 && acc == requirements[k];
+			return lineCount == maxLineCount - 1 && lineLen == requirements[lineCount];
 		}
-		else
-		{
+		else {
 			// 檢查線段數是否等於規範的組數
-			return k == sizeof(requirements) / sizeof(*requirements);
+			return lineCount == maxLineCount;
 		}
 	}
-	else
-	{
+	else {
 		// 如果是線段的話，要檢查當前線段是否小於規範的長度
-		if (isLast)
-		{
+		if (isLast) {
 			// 檢查當前線段是否小於規範的長度
-			return acc <= requirements[k];
+			return lineLen <= requirements[lineCount];
 		}
 	}
 	// 以上檢查全數通過
 	return true;
 }
 
-/// <summary>
-/// 印出二維陣列
-/// </summary>
-/// <param name="array2D">二維陣列</param>
-void Print(int array2D[][5])
-{
+// 印出二維陣列 - 解圖面板
+void PrintBoard() {
 	// 垂直迴圈
-	for (int h = 0; h < sizeof(array2D); h++)
-	{
+	int h = 0;
+	for (h = 0; h < mapsize; h++) {
 		// 水平迴圈
-		for (int w = 0; w < sizeof(array2D[h]); w++)
-		{
-			printf(array2D[h, w] == 1 ? "Ｘ" : "　");
-			//printf(array2D[h, w] == 1 ? "\x25A0" : "　");
+		int w = 0;
+		for (w = 0; w < mapsize; w++) {
+			printf(board[h][w] == 1 ? "1" : "0");
 		}
 		printf("\n");
 	}
+}
+
+// 寫檔二維陣列 - 解圖面板
+void WriteBoardToFile() {
+	FILE* output_file = NULL;
+	errno_t err;
+	char* filename = "output.txt";
+	err = fopen_s(&output_file, filename, "w");
+	if (err != 0) {
+		printf("The file was not opened\n");
+		return;
+	}
+
+	int h = 0;
+	for (h = 0; h < mapsize; h++) {
+		int w = 0;
+		for (w = 0; w < mapsize; w++) {
+			fprintf(output_file, board[h][w] == 1 ? "1" : "0");
+		}
+		fprintf(output_file, "\n");
+	}
+	if (output_file) {
+		err = fclose(output_file);
+		if (err != 0) {
+			printf("The file was not closed\n");
+		}
+	}
+	printf("Success Write File!\n");
 }
