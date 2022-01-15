@@ -4,10 +4,32 @@ typedef int bool;
 #define false 0  
 #define true  1  
 
+/* 5x5 測資 */
+#define mapsize 5
+#define rulelength 3
+// Columns Rules
+int columns[mapsize][rulelength] = { {2,0,0},{3,0,0},{2,0,0},{3,0,0},{3,0,0} };
+// Row Rules
+int rows[mapsize][rulelength] = { {3,0,0},{3,0,0},{2,2,0},{2,0,0},{1,0,0} };
+/* 15x15 測資 */
+/*
 #define mapsize 15
 #define rulelength 5
-int rows[mapsize][rulelength]={{2,3,1,0,0},{2,3,0,0,0},{2,4,1,0,0},{1,6,1,1,0},{5,3,0,0,0},{6,1,1,0,0},{4,1,0,0,0},{1,8,0,0,},{1,1,4,2,0},{3,5,0,0,0},{3,1,3,0,0},{3,4,0,0,0},{2,1,2,1,0},{2,2,3,1,0},{2,5,3,2,0}};
+// Columns Rules
 int columns[mapsize][rulelength] = { {4,7,0,0,0},{3,6,0,0,0},{3,0,0,0,0},{2,1,0,0,0},{6,1,0,0,0},{4,3,0,0,0},{4,1,2,0,0},{3,1,1,0,0},{4,3,0,0,0},{4,8,0,0,0},{3,8,0,0,0},{4,1,5,2,0},{1,1,1,1,0},{7,1,0,0,0},{1,1,2,3,0} };
+// Row Rules
+int rows[mapsize][rulelength]={{2,3,1,0,0},{2,3,0,0,0},{2,4,1,0,0},{1,6,1,1,0},{5,3,0,0,0},{6,1,1,0,0},{4,1,0,0,0},{1,8,0,0,},{1,1,4,2,0},{3,5,0,0,0},{3,1,3,0,0},{3,4,0,0,0},{2,1,2,1,0},{2,2,3,1,0},{2,5,3,2,0}};
+*/
+/* 20x20 測資 */
+/*
+#define mapsize 20
+#define rulelength 6
+// Columns Rules
+int columns[mapsize][rulelength] = { {1,2,1,0,0,0},{1,1,0,0,0,0},{7,2,0,0,0,0},{7,1,1,2,0,0},{7,1,1,0,0,0},{6,5,1,0,0,0},{4,1,3,1,1,0},{2,1,2,3,0,0},{1,1,3,2,2,0},{9,2,0,0,0,0},{3,5,0,0,0,0},{1,7,3,0,0,0},{2,8,2,0,0,0},{1,4,1,1,2,0},{3,3,1,1,0,0},{4,2,5,0,0,0},{5,4,7,0,0,0},{1,12,0,0,0,0},{10,1,2,0,0,0},{2,9,1,2,0,0} };
+// Row Rules
+int rows[mapsize][rulelength] = { {7,1,3,1,0,0},{7,1,5,1,0,0},{5,1,2,3,0,0},{5,2,2,0,0,0},{4,2,1,0,0,0},{8,2,2,0,0,0},{3,2,2,2,0,0},{6,4,0,0,0,0},{11,0,0,0,0,0},{1,3,11,0,0,0},{3,5,4,0,0,0},{1,4,4,3,0,0},{1,1,2,4,0,0},{2,5,0,0,0,0},{1,1,5,0,0,0},{2,3,0,0,0,0},{1,3,2,6,0,0},{1,1,3,0,0,0},{2,3,4,4,0,0},{3,1,3,2,0,0} };
+*/
+
 // 寬度
 int width = mapsize;
 // 高度
@@ -24,6 +46,7 @@ void WriteBoardToFile();
 
 // 主程式
 int main() {
+	printf("----------\n");
 	// 初始化解圖面板
 	int h = 0;
 	int w = 0;
@@ -33,15 +56,16 @@ int main() {
 		}
 	}
 	if (Solve()) {
-		printf("Success\n");
+		printf("Success\n----------\n");
 		// 輸出結果
 		PrintBoard();
 		// 寫檔
 		WriteBoardToFile();
 	}
 	else {
-		printf("Fail\n");
+		printf("Fail\n----------\n");
 	}
+	printf("%d", cnt);
 }
 
 // 執行求解
@@ -59,8 +83,9 @@ bool Solve() {
 // w:水平第幾格
 bool FindSolution(int h, int w) {
 	// 目前高度位置已等於最大高度
-	if (h == height)
+	if (h == height) {
 		return true;
+	}
 
 	// 下一個求解高度位置
 	int nextH = h + (w + 1 == width ? 1 : 0);
@@ -190,6 +215,7 @@ void PrintBoard() {
 		}
 		printf("\n");
 	}
+	printf("----------\n");
 }
 
 // 寫檔二維陣列 - 解圖面板
@@ -199,7 +225,7 @@ void WriteBoardToFile() {
 	char* filename = "output.txt";
 	err = fopen_s(&output_file, filename, "w");
 	if (err != 0) {
-		printf("The file was not opened\n");
+		printf("The file was not opened\n----------\n");
 		return;
 	}
 
@@ -214,8 +240,8 @@ void WriteBoardToFile() {
 	if (output_file) {
 		err = fclose(output_file);
 		if (err != 0) {
-			printf("The file was not closed\n");
+			printf("The file was not closed\n----------\n");
 		}
 	}
-	printf("Success Write File!\n");
+	printf("Success Write File!\n----------\n");
 }
